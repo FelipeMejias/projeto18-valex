@@ -1,7 +1,8 @@
 import { QueryResultRow } from "pg";
-import { CardInsertData, insert, TransactionTypes } from "../repositories/cardRepository.js";
+import { CardInsertData, insert, TransactionTypes, update } from "../repositories/cardRepository.js";
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs'
+import bcrypt from 'bcrypt'
 export async function createCard(employee:QueryResultRow,type:TransactionTypes) {
     
     const card: CardInsertData={
@@ -13,11 +14,19 @@ export async function createCard(employee:QueryResultRow,type:TransactionTypes) 
         password:null,
         isVirtual:true,
         originalCardId:null,
-        isBlocked:true,
+        isBlocked:false,
         type
     }
     await insert(card)
 } 
+
+export async function activateCardWithPassword(card:QueryResultRow,password:string,securityCode:string){
+    if(securityCode!==card.securityCode)throw {type:'unauthorized'}
+    if(card.password)throw {type:'already in use'}
+    const hashedPassword = bcrypt.hashSync(password, 10)
+    const cardUpdateData={password:hashedPassword}
+    await update(card.id,cardUpdateData)
+}
 
 function defineCardholderName(fullName:string){
     const list = fullName.toUpperCase().split(' ')
@@ -28,7 +37,7 @@ function defineCardholderName(fullName:string){
     finalList.push(list[list.length-1])
     return finalList.join(' ')
 }
-export function defineExpirationDate(){
+function defineExpirationDate(){
     const today= dayjs().format('MM/YY')
     const expirationYear=parseInt(today[3]+today[4])+5
     return today[0]+today[1]+today[2]+expirationYear
