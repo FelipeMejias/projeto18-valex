@@ -28,6 +28,19 @@ export async function activateCardWithPassword(card:QueryResultRow,password:stri
     await update(card.id,cardUpdateData)
 }
 
+export async function changeToBlockCard(card:QueryResultRow){
+    if(card.isBlocked)throw {type:'already in use'}
+    const cardUpdateData={isBlocked:true}
+    await update(card.id,cardUpdateData)
+}
+
+export async function changeToUnblockCard(card:QueryResultRow){
+    if(!card.isBlocked)throw {type:'already in use'}
+    const cardUpdateData={isBlocked:false}
+    await update(card.id,cardUpdateData)
+}
+
+
 function defineCardholderName(fullName:string){
     const list = fullName.toUpperCase().split(' ')
     const finalList=[list[0]]
