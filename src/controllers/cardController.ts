@@ -1,11 +1,17 @@
 import { Request, Response } from "express";
-import { createCard , activateCardWithPassword, changeToBlockCard, changeToUnblockCard } from "../services/cardService.js";
+import { createCard , activateCardWithPassword, changeToBlockCard, changeToUnblockCard, getCardDetailsById } from "../services/cardService.js";
 
 export async function postCard(req:Request,res:Response){
     const {type}=req.body
     const {employee}=res.locals
     await createCard(employee,type)
     res.sendStatus(200)
+}
+
+export async function getCardDetails(req:Request,res:Response){
+    const {card} = res.locals
+    const cardDetails = await getCardDetailsById(card.id)
+    res.send(cardDetails)
 }
 
 export async function activateCard(req:Request,res:Response){

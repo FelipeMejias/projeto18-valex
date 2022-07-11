@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { createPayment } from "../services/paymentService"
+import { createPayment } from "../services/paymentService.js"
 
 export async function postPayment(req:Request,res:Response){
     const {amount}:{amount:number}=req.body

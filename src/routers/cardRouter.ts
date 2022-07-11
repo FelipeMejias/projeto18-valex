@@ -1,5 +1,5 @@
 import Router from 'express'
-import { activateCard, blockCard, postCard, unblockCard } from '../controllers/cardController.js'
+import { activateCard, blockCard, getCardDetails, postCard, unblockCard } from '../controllers/cardController.js'
 import { cardExists, confirmPassword, isUnexpired } from '../middlewares/cardValidation.js'
 import { companyApiValidation } from '../middlewares/companyApiValidation.js'
 import { employeeValidation } from '../middlewares/employeeValidation.js'
@@ -10,9 +10,9 @@ cardRouter.post('/card', companyApiValidation , employeeValidation, postCard )
 
 cardRouter.post('/card/:cardId/activate', cardExists , activateCard )
 
-cardRouter.get('/card')
+//cardRouter.get('/card/:employeeId', getCardDetails)
 
-cardRouter.get('/card/transactions')
+cardRouter.get('/card/:cardId', cardExists , getCardDetails)
 
 cardRouter.post('/card/:cardId/block', cardExists , confirmPassword , isUnexpired , blockCard)
 

@@ -3,6 +3,8 @@ import { CardInsertData, insert, TransactionTypes, update } from "../repositorie
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs'
 import bcrypt from 'bcrypt'
+import { findByCardId as findPayments}  from "../repositories/paymentRepository.js";
+import { findByCardId as findRecharges } from "../repositories/rechargeRepository.js";
 export async function createCard(employee:QueryResultRow,type:TransactionTypes) {
     
     const card: CardInsertData={
@@ -20,22 +22,43 @@ export async function createCard(employee:QueryResultRow,type:TransactionTypes) 
     await insert(card)
 } 
 
+export async function getCardDetailsById(cardId:number) {
+    const transactionList= await findPayments(cardId)
+    const rechargeList=await findRecharges(cardId)
+    let balance = 0
+    for(let transaction of transactionList){
+        balance-=transaction.amount
+    }
+    for(let recharge of rechargeList){
+        balance+=recharge.amount
+    }
+    return {
+        balance,
+        transactions:transactionList,
+        recharges:rechargeList
+    }
+}
+
+
+
 export async function activateCardWithPassword(card:QueryResultRow,password:string,securityCode:string){
-    if(securityCode!==card.securityCode)throw {type:'unauthorized'}
-    if(card.password)throw {type:'already in use'}
+
+    if(securityCode!==card.securityCode)throw {type:'unauthorized' ,message:'security code wrong'}
+    
+    if(card.password)throw {type:'already in use' ,message:'card already active'}
     const hashedPassword = bcrypt.hashSync(password, 10)
     const cardUpdateData={password:hashedPassword}
     await update(card.id,cardUpdateData)
 }
 
 export async function changeToBlockCard(card:QueryResultRow){
-    if(card.isBlocked)throw {type:'already in use'}
+    if(card.isBlocked)throw {type:'already in use' ,message:'card already blocked'}
     const cardUpdateData={isBlocked:true}
     await update(card.id,cardUpdateData)
 }
 
 export async function changeToUnblockCard(card:QueryResultRow){
-    if(!card.isBlocked)throw {type:'already in use'}
+    if(!card.isBlocked)throw {type:'already in use' ,message:'card already unblocked'}
     const cardUpdateData={isBlocked:false}
     await update(card.id,cardUpdateData)
 }

@@ -3,6 +3,7 @@ import "express-async-errors"
 import cors from 'cors'
 import dotenv from 'dotenv'
 import router from './routers/index.js'
+import { handleError } from './middlewares/handleError.js'
 dotenv.config()
 
 const app=express()
@@ -10,6 +11,7 @@ const app=express()
 app.use(json())
 app.use(cors())
 app.use(router)
+app.use(handleError)
 
 const port:number=+process.env.PORT || 5001
 app.listen(port,()=>{

@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { createRecharge } from "../services/rechargeService"
+import { createRecharge } from "../services/rechargeService.js"
 
 export async function recharge(req:Request,res:Response){
     const {amount}:{amount:number}=req.body

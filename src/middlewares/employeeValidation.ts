@@ -8,11 +8,13 @@ export async function employeeValidation(req:Request,res:Response,next:NextFunct
     const {employeeId,type}:{employeeId:number,type:TransactionTypes}=req.body
 
     const employee= await findById(employeeId)
-    if(!employee || employee.companyId !== company.id)throw {type:'unauthorized'}
+    if(!employee)throw {type:'not found' , message:'this employee does not exist'}
+
+    if(employee.companyId !== company.id)throw {type:'unauthorized' ,message:'employee is not from this company'}
     res.locals.employee=employee
 
     const cardOfThisType= await findByTypeAndEmployeeId(type,employeeId)
-    if(cardOfThisType)throw {type:'unauthorized'}
+    if(cardOfThisType)throw {type:'unauthorized', message:'employee already has a card of this type'}
 
     next()
 }

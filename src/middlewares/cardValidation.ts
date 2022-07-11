@@ -5,20 +5,16 @@ import dayjs from 'dayjs'
 export async function cardExists(req:Request,res:Response,next:NextFunction){
     const id:number=parseInt(req.params.cardId)
     const card= await findById(id)
-    if(!card)throw {type:'not found'}
+    if(!card)throw {type:'not found' ,message:'this card does not exist'}
     res.locals.card=card
     next()
-}
-
-export async function cvc(req:Request,res:Response,next:NextFunction){
-    
 }
 
 export async function confirmPassword(req:Request,res:Response,next:NextFunction){
     const password:string=req.body.password
     const {card}=res.locals
-    if(!card.password)throw {type:'unavailable'}
-    if( !bcrypt.compareSync(password, card.password))throw{type:'unauthorized'}
+    if(!card.password)throw {type:'unavailable' ,message:'this card is not active'}
+    if( !bcrypt.compareSync(password, card.password))throw{type:'unauthorized' , message:'password wrong'}
     next()
 }
 
@@ -35,6 +31,6 @@ export async function isUnexpired(req:Request,res:Response,next:NextFunction){
     if(
         (todayYear>expirationYear)||
         (todayYear===expirationYear && todayMonth>=expirationMonth)
-    )throw {type:'unauthorized'}
+    )throw {type:'unauthorized' , message:'card expired'}
     next()
 }
