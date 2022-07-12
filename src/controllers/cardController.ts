@@ -4,8 +4,8 @@ import { createCard , activateCardWithPassword, changeToBlockCard, changeToUnblo
 export async function postCard(req:Request,res:Response){
     const {type}=req.body
     const {employee}=res.locals
-    await createCard(employee,type)
-    res.sendStatus(200)
+    const {securityCode}=await createCard(employee,type)
+    res.status(200).send({securityCode})
 }
 
 export async function getCardDetails(req:Request,res:Response){

@@ -1,12 +1,22 @@
 import { NextFunction, Request, Response } from "express"
-import { findById } from "../repositories/cardRepository.js"
 import bcrypt from 'bcrypt'
-import dayjs from 'dayjs'
+import joi from 'joi'
+import { findById } from "../repositories/cardRepository.js"
+import { checkExpiriration } from "../utils/cardUtils.js"
+
 export async function cardExists(req:Request,res:Response,next:NextFunction){
     const id:number=parseInt(req.params.cardId)
     const card= await findById(id)
     if(!card)throw {type:'not found' ,message:'this card does not exist'}
     res.locals.card=card
+    next()
+}
+
+export async function newPasswordValidation(req:Request,res:Response,next:NextFunction){
+    const {password}=req.body
+    const schema=joi.string().pattern(/^[0-9]{4}$/).required()
+    const validate=schema.validate(password)
+    if (validate.error) throw {type:'bad request' ,message:'new password must have exactly 4 numbers'}
     next()
 }
 
@@ -20,17 +30,8 @@ export async function confirmPassword(req:Request,res:Response,next:NextFunction
 
 export async function isUnexpired(req:Request,res:Response,next:NextFunction){
     const {card}= res.locals
-    const today= dayjs().format('MM/YY')
     const expiration=card.expirationDate
-
-    const todayYear=parseInt(today[3]+today[4])
-    const todayMonth=parseInt(today[0]+today[1])
-    const expirationYear=parseInt(expiration[3]+expiration[4])
-    const expirationMonth=parseInt(expiration[0]+expiration[1])
-
-    if(
-        (todayYear>expirationYear)||
-        (todayYear===expirationYear && todayMonth>=expirationMonth)
-    )throw {type:'unauthorized' , message:'card expired'}
+    const expired=checkExpiriration(expiration)
+    if(expired)throw {type:'unauthorized' , message:'card expired'}
     next()
 }

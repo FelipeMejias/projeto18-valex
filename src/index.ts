@@ -13,7 +13,7 @@ app.use(cors())
 app.use(router)
 app.use(handleError)
 
-const port:number=+process.env.PORT || 5001
+const port:number=+process.env.PORT || 5000
 app.listen(port,()=>{
     console.log(`Server running on port ${port}`)
 })
